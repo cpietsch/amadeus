@@ -1,0 +1,7 @@
+#!/bin/bash
+# Stand-in for scontrol: `show hostnames` lists $FAKE_NODES, `show job` gives an end time 10 min from now.
+case "$1 $2" in
+    "show hostnames") printf '%s\n' $FAKE_NODES ;;
+    "show job") echo "JobId=$3 JobName=x EndTime=$(date -d "@$(( $(date +%s) + 600 ))" +%Y-%m-%dT%H:%M:%S) Partition=p" ;;
+    *) echo "scontrol stub: $*" >&2; exit 1 ;;
+esac

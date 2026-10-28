@@ -1,0 +1,7 @@
+#!/bin/bash
+# srun stub (node_exec): logs the call, skips srun's own options and runs the command locally.
+# $FAKE_HOME/srun.fail makes the step launch fail like a job that is ending.
+echo "srun $*" >> "$FAKE_HOME/slurm.log"
+[ -f "$FAKE_HOME/srun.fail" ] && { echo "srun: error: Unable to create step for job 4242: Job/step already completing or completed" >&2; exit 1; }
+while [ $# -gt 0 ] && [ "${1#-}" != "$1" ]; do shift; done
+exec "$@"

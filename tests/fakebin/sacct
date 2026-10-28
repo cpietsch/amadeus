@@ -1,0 +1,4 @@
+#!/bin/bash
+# sacct.txt holds rows in the server's SACCT_FMT; a query for SubmitLine prints sacct_submit.txt (JobIDRaw|SubmitLine)
+case "$*" in *SubmitLine*) [ -f "$FAKE_HOME/sacct_submit.txt" ] && cat "$FAKE_HOME/sacct_submit.txt"; exit 0 ;; esac
+[ -f "$FAKE_HOME/sacct.txt" ] && cat "$FAKE_HOME/sacct.txt"; exit 0

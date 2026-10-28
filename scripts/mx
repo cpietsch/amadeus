@@ -1,0 +1,16 @@
+#!/bin/bash
+# Run a command on the MUSICA login node, non-interactively and with a hard timeout.
+#   scripts/mx 'squeue -u $USER'
+#   MX_TIMEOUT=300 scripts/mx 'long command'
+#   MX_LMOD=1 scripts/mx 'module -t avail CUDA'     # initialise Lmod first
+# Exit codes: the remote command's code; 124 = timed out; 255 = SSH failure
+# (tunnel/cert: run scripts/musica_auth.sh).
+
+[ $# -ge 1 ] || { echo "usage: $0 'remote command'" >&2; exit 2; }
+
+LMOD_INIT='source /cvmfs/software.eessi.io/versions/${EESSI_VERSION:-2025.06}/init/lmod/sh >/dev/null 2>&1; module use /cvmfs/software.asc.ac.at/init/modules;'
+CMD="$*"
+[ "${MX_LMOD:-0}" = 1 ] && CMD="$LMOD_INIT $CMD"
+
+. "$(dirname "$0")/lib/access.sh"
+timeout "${MX_TIMEOUT:-120}" ssh -o BatchMode=yes "${SSHF[@]}" musica "$CMD" 2> >(grep -v '^Pseudo-terminal will not be allocated' >&2)

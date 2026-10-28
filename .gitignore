@@ -1,0 +1,16 @@
+*.err
+*.key
+*.out
+*.pem
+*.sif
+.env
+.venv/
+__pycache__/
+docs-extra/
+docs-vsc/
+logs/
+results/
+issues/.lock
+.claude/
+# the job ledger lived here before it moved to ~/.local/state/amadeus/
+state/

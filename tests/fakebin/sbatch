@@ -1,0 +1,15 @@
+#!/bin/bash
+echo "sbatch $*" >> "$FAKE_HOME/slurm.log"
+for a in "$@"; do
+    if [ "$a" = --test-only ]; then
+        for f in "$@"; do
+            [ -f "$f" ] || continue
+            head -1 "$f" | grep -q '^#!' || { echo "sbatch: error: This does not look like a batch script." >&2; exit 1; }
+            cp "$f" "$FAKE_HOME/test-only.slurm"; break
+        done
+        [ -f "$FAKE_HOME/asc.txt" ] && cat "$FAKE_HOME/asc.txt" >&2      # what ASC's submit filter prints
+        echo "sbatch: Job 999 to start at 2026-10-14T12:00:00" >&2; exit 0
+    fi
+done
+echo "sbatch: applying job settings" >&2
+echo 4242

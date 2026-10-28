@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "scancel $*" >> "$FAKE_HOME/slurm.log"
+[ -f "$FAKE_HOME/scancel.fail" ] && { echo "scancel: error: Kill job error" >&2; exit 1; }; exit 0

@@ -1,0 +1,9 @@
+#!/bin/bash
+# squeue.txt holds full rows (%i|%j|%T|%M|%l|%D|%P|%q|%R|%S|%V); `-o %D` prints only the node counts;
+# a format with %Z (WorkDir, push_files) prints squeue_wd.txt (%i|%T|%j|%Z|%o); one with %E (job_details of a
+# pending job) prints squeue_dep.txt (%i|%r|%S|%E)
+prev=""; for a in "$@"; do [ "$prev" = -o ] && fmt=$a; prev=$a; done
+case $fmt in *%E*) [ -f "$FAKE_HOME/squeue_dep.txt" ] && cat "$FAKE_HOME/squeue_dep.txt"; exit 0 ;; esac
+case $fmt in *%Z*) [ -f "$FAKE_HOME/squeue_wd.txt" ] && cat "$FAKE_HOME/squeue_wd.txt"; exit 0 ;; esac
+f="$FAKE_HOME/squeue.txt"; [ -f "$f" ] || exit 0
+if [ "$fmt" = "%D" ]; then cut -d'|' -f6 "$f"; else cat "$f"; fi

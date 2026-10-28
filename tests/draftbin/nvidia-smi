@@ -1,0 +1,2 @@
+#!/bin/bash
+echo "GPU 0: NVIDIA H100 (fake)"

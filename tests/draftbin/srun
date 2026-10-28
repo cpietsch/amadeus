@@ -1,0 +1,25 @@
+#!/bin/bash
+# Stand-in for srun in the dry runs of drafted job scripts (tests/test_drafts.py): runs the command once per task, in
+# parallel, each in its own process group with SLURM_PROCID set; SIGTERM ends all of them, as srun does.
+# FAKE_SRUN_FAIL_FIRST=1: the first launch fails at once, like a "Prolog hung" launch failure.
+n=${SLURM_JOB_NUM_NODES:-1}; node=''
+while [ $# -gt 0 ]; do
+    case $1 in
+        --ntasks=*) n=${1#*=} ;;
+        -w) node=$2; shift ;;
+        --nodes=*|--ntasks-per-node=*|--cpus-per-task=*|--gres=*|--mem=*|--cpu-bind=*|--threads-per-core=*) ;;
+        -*) echo "srun stub: unknown option $1" >&2; exit 2 ;;
+        *) break ;;
+    esac
+    shift
+done
+echo "srun n=$n node=$node $1" >> "$DRY/srun.log"
+if [ -n "${FAKE_SRUN_FAIL_FIRST:-}" ] && [ ! -e "$DRY/srun-failed" ]; then
+    touch "$DRY/srun-failed"; echo "srun: error: Prolog hung on node fake" >&2; exit 1
+fi
+pids=()
+trap 'for p in "${pids[@]}"; do kill -TERM -- -"$p" 2>/dev/null; done; exit 143' TERM INT
+for (( t = 0; t < n; t++ )); do SLURM_PROCID=$t setsid "$@" & pids+=($!); done
+rc=0
+for p in "${pids[@]}"; do wait "$p" || rc=$?; done
+exit $rc

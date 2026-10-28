@@ -1,0 +1,10 @@
+#!/bin/bash
+# scontrol stub: `show job -o ID` prints $FAKE_HOME/scontrol.txt (or a default held 1-node dev job); other
+# subcommands (release, hold, update) are logged.
+echo "scontrol $*" >> "$FAKE_HOME/slurm.log"
+if [ "$1" = show ]; then
+    if [ -f "$FAKE_HOME/scontrol.txt" ]; then cat "$FAKE_HOME/scontrol.txt"; else
+        echo "JobId=4242 JobName=smoke UserId=tester(1) JobState=PENDING Reason=JobHeldUser Partition=zen4_0768_h100x4 QOS=dev_zen4_0768_h100x4 NumNodes=1 TimeLimit=00:10:00 TRES=cpu=88,node=1,billing=1"
+    fi
+fi
+[ -f "$FAKE_HOME/scontrol.fail" ] && exit 1; exit 0

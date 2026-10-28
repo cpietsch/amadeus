@@ -1,0 +1,35 @@
+# Amadeus configuration: the ASC project this server works for.
+# Copy to ~/.config/amadeus/config.toml (or point AMADEUS_CONFIG at another file) and fill in your project's values
+# (the projects portal, projects.asc.ac.at, shows them). The values below are placeholders.
+# Environment variables win over this file: AMADEUS_USER, AMADEUS_ACCOUNT, AMADEUS_PROJECT, AMADEUS_FILESYSTEM,
+# AMADEUS_BUDGET, AMADEUS_WORKDIR, AMADEUS_TEMPLATE_DIRS (colon-separated), AMADEUS_LOCAL_ROOT, AMADEUS_HOSTS
+# (comma-separated), AMADEUS_DEFAULT_HOST. An empty value counts as unset.
+# Restart the agent (and so the server) after changing it.
+
+[cluster]
+user = "user1234"                # your ASC username; Amadeus writes its own ssh config with it (nothing in ~/.ssh)
+# vpn = "auto"                   # auto: the system's path (WireGuard app, university network) when the login node
+                                 # answers directly, else wireproxy if configured; or "system" / "wireproxy"
+
+[project]
+name = "my-project-2026"         # ASC project name, shown to agents
+account = "p123456"              # Slurm account; required for check_job/submit_job (p<n>, not the filesystem fs<n>)
+filesystem = "fs123456"          # /data/<filesystem>/<user> ($DATA), /scratch/<filesystem>/<user> ($SCRATCH)
+budget_tokens = 1000             # total project budget in tokens; budget shows what is left
+ends = "2026-12-31"              # project end date, shown to agents
+workdir = "~/my-project"         # default working directory on the cluster (default $DATA); a directory in $DATA,
+                                 # or a symlink to one: ASC asks not to run jobs from $HOME
+# notes = "/path/to/my-project/PROJECT.md"      # optional: Markdown served as amadeus://project (approvals, what
+                                                # is installed in your $DATA, status)
+template_dirs = []               # job-script directories listed by job_templates besides Amadeus's own jobs/,
+                                 # e.g. ["/path/to/my-project/jobs"]
+
+[limits]                         # approval thresholds; defaults as shown
+approval_nodes = 4               # this many nodes at once (all your running and pending jobs together) need approval
+approval_tokens = 20             # more tokens than this (at the time limit, your other jobs included) need approval
+headsup_nodes = 16               # jobs this large need their own heads-up and an approval naming the node count
+
+[files]
+local_root = "~"                # push_files/fetch_files only read and write below this on the server's machine
+hosts = []                       # extra machines for push/fetch, by ssh name (e.g. ["gpu-workstation"])
+default_host = ""                # the host push/fetch use when the caller names none ("" = the server's machine)

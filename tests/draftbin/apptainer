@@ -1,0 +1,21 @@
+#!/bin/bash
+# Stand-in for apptainer exec: `vllm serve` starts tests/draftbin/fake_vllm.py on the requested port (FAKE_VLLM_FAIL_ONCE:
+# the first start fails); anything else runs on the host.
+[ "$1" = exec ] || { echo "apptainer stub: $*" >&2; exit 2; }
+shift
+while [ $# -gt 0 ]; do
+    case $1 in --nv|--writable-tmpfs) ;; -B) shift ;; -*) echo "apptainer stub: unknown option $1" >&2; exit 2 ;; *) break ;; esac
+    shift
+done
+echo "apptainer exec $1 ${*:2}" >> "$DRY/apptainer.log"
+shift                                   # the image
+if [ "$1 $2" = "vllm serve" ]; then
+    port='' key=''
+    while [ $# -gt 0 ]; do case $1 in --port) port=$2 ;; --api-key) key=$2 ;; esac; shift; done
+    if [ -n "${FAKE_VLLM_FAIL_ONCE:-}" ] && [ ! -e "$DRY/vllm-failed" ]; then
+        touch "$DRY/vllm-failed"; echo "RuntimeError: CUDA error (fake)"; exit 1
+    fi
+    echo "CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES port=$port"
+    exec python3 "$(dirname "$0")/fake_vllm.py" "$port" "$key"
+fi
+exec "$@"

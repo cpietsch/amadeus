@@ -1,0 +1,4 @@
+#!/bin/bash
+# Short sleeps stay, long ones (polling, retry waits) take 0.2 s.
+real=$(PATH=/usr/bin:/bin command -v sleep)
+case $1 in 0.*|[0-4]) exec "$real" "$1" ;; *) exec "$real" 0.2 ;; esac

@@ -1,0 +1,13 @@
+#!/bin/bash
+# sinfo.txt holds %R|%T|%D rows (partition|state|node count), state as sinfo prints it (lowercase, with suffixes
+# like '*' and combined forms like 'idle+planned'); `-o '%R|%F'` sums them the way Slurm does: planned, reserved and
+# maintenance nodes count as idle, drained/down/failed ones as other.
+prev=""; for a in "$@"; do [ "$prev" = -o ] && fmt=$a; prev=$a; done
+f="$FAKE_HOME/sinfo.txt"; [ -f "$f" ] || exit 0
+case $fmt in
+  *%F*) awk -F'|' '{ s=tolower($2); sub(/[*~#!%$@^-]+$/, "", s); p[$1]=1; t[$1]+=$3
+                     if (s ~ /drain|down|fail|future|inval|unknown|boot|power/) o[$1]+=$3
+                     else if (s ~ /^(alloc|mix|comp)/) a[$1]+=$3; else i[$1]+=$3 }
+                   END { for (k in p) printf "%s|%d/%d/%d/%d\n", k, a[k], i[k], o[k], t[k] }' "$f" ;;
+  *) cat "$f" ;;
+esac

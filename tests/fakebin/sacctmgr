@@ -1,0 +1,4 @@
+#!/bin/bash
+# logs every call; `show qos` prints one parsable row (Name|MaxWall)
+echo "sacctmgr $*" >> "$FAKE_HOME/slurm.log"
+case "$*" in *qos*) echo "zen4_0768_h100x4|3-00:00:00|" ;; esac; exit 0
